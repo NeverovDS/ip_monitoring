@@ -4,7 +4,10 @@
 
 <section class="card">
   <h2>Add an IP</h2>
-  <%= render "form", ip: @ip %>
+  <%# id target so the create stream can reset (update) this form in place. %>
+  <div id="new_ip_form">
+    <%= render "form", ip: @ip %>
+  </div>
 </section>
 
 <table class="ips">
@@ -17,11 +20,12 @@
       <th class="actions-col">Actions</th>
     </tr>
   </thead>
-  <tbody>
+  <%# id target for turbo_stream append/remove of rows. %>
+  <tbody id="ips">
     <% if @ips.any? %>
       <%= render @ips %>
     <% else %>
-      <tr><td colspan="5" class="empty">No IPs yet — add one above.</td></tr>
+      <%= render "empty_row" %>
     <% end %>
   </tbody>
 </table>

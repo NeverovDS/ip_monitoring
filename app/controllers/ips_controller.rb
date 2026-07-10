@@ -14,11 +14,22 @@ class IpsController < ApplicationController
     @ip = Ip.new(ip_params)
 
     if @ip.save
-      redirect_to ips_path, notice: "#{@ip.ip_address} added."
+      respond_to do |format|
+        format.turbo_stream # create.turbo_stream.erb: append row + reset form
+        format.html { redirect_to ips_path, notice: "#{@ip.ip_address} added." }
+      end
     else
-      # Re-render the list with the invalid form (index also renders the form).
-      @ips = Ip.order(:id)
-      render :index, status: :unprocessable_content
+      respond_to do |format|
+        # Re-render just the add form (with errors) in place.
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.update("new_ip_form", partial: "form", locals: { ip: @ip }),
+                 status: :unprocessable_content
+        end
+        format.html do
+          @ips = Ip.order(:id)
+          render :index, status: :unprocessable_content
+        end
+      end
     end
   end
 
@@ -27,7 +38,9 @@ class IpsController < ApplicationController
 
   def update
     if @ip.update(ip_params)
-      redirect_to ips_path, notice: "#{@ip.ip_address} updated."
+      # No flash: the inline edit happens inside a Turbo Frame, so a redirect
+      # notice would not render here and would linger until the next full load.
+      redirect_to ips_path
     else
       render :edit, status: :unprocessable_content
     end
@@ -35,7 +48,10 @@ class IpsController < ApplicationController
 
   def destroy
     @ip.destroy
-    redirect_to ips_path, notice: "#{@ip.ip_address} removed."
+    respond_to do |format|
+      format.turbo_stream # destroy.turbo_stream.erb: remove the row
+      format.html { redirect_to ips_path, notice: "#{@ip.ip_address} removed." }
+    end
   end
 
   def enable

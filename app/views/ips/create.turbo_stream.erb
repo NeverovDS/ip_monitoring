@@ -1,0 +1,7 @@
+<%# One response, three DOM changes: add the row, drop the empty-state row
+    (no-op if absent), and reset the add form in place. %>
+<%= turbo_stream.append "ips" do %>
+  <%= render "ip", ip: @ip %>
+<% end %>
+<%= turbo_stream.remove "no_ips" %>
+<%= turbo_stream.update "new_ip_form", partial: "form", locals: { ip: Ip.new } %>

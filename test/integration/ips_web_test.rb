@@ -26,6 +26,28 @@ class IpsWebTest < ActionDispatch::IntegrationTest
     assert_select ".errors"
   end
 
+  test "create via turbo stream appends the row and resets the form" do
+    assert_difference -> { Ip.count }, 1 do
+      post ips_path, params: { ip: { ip_address: "1.1.1.1" } }, as: :turbo_stream, headers: AUTH
+    end
+    assert_response :ok
+    assert_select "turbo-stream[action=append][target=ips]"
+    assert_select "turbo-stream[action=update][target=new_ip_form]"
+  end
+
+  test "invalid create via turbo stream re-renders the form with errors" do
+    post ips_path, params: { ip: { ip_address: "not-an-ip" } }, as: :turbo_stream, headers: AUTH
+    assert_response :unprocessable_content
+    assert_select "turbo-stream[action=update][target=new_ip_form]"
+  end
+
+  test "destroy via turbo stream removes the row" do
+    ip = Ip.create!(ip_address: "8.8.8.8")
+    delete ip_path(ip), as: :turbo_stream, headers: AUTH
+    assert_response :ok
+    assert_select "turbo-stream[action=remove][target=?]", "ip_#{ip.id}"
+  end
+
   test "edit renders an inline form in the address frame" do
     ip = Ip.create!(ip_address: "8.8.8.8")
     get edit_ip_path(ip), headers: AUTH

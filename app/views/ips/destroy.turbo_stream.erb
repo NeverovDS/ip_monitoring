@@ -1,0 +1,5 @@
+<%# Remove the row; restore the empty-state row if that was the last IP. %>
+<%= turbo_stream.remove @ip %>
+<% if Ip.none? %>
+  <%= turbo_stream.append "ips", partial: "empty_row" %>
+<% end %>
