@@ -16,8 +16,15 @@ gem "turbo-rails"
 gem "stimulus-rails"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
-# Use Redis adapter to run Action Cable in production
-# gem "redis", ">= 4.0.1"
+# Redis: backing store for Sidekiq and the Action Cable adapter
+gem "redis", ">= 4.0.1"
+
+# Background jobs (kept instead of the Solid Queue default)
+gem "sidekiq"
+gem "sidekiq-cron"
+
+# IP address parsing/validation for the availability checks
+gem "ipaddress"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"

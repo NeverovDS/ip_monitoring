@@ -16,6 +16,10 @@ module IpMonitoring
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
+    # Dump the schema as SQL: the ruby schema.rb format cannot represent the
+    # PostgreSQL trigger/function that maintains ip_status_changes.
+    config.active_record.schema_format = :sql
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files
