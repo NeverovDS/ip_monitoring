@@ -23,13 +23,15 @@ class IpStatsService
   private
 
   def parse_time_to(time_to)
-    time_to.nil? ? Time.current : Time.iso8601(time_to)
+    # blank? (not nil?): HTML forms submit empty strings, not nil, for
+    # unfilled fields — Time.iso8601("") would raise ArgumentError.
+    time_to.blank? ? Time.current : Time.iso8601(time_to)
   end
 
   def parse_time_from(time_from)
     # Subtract seconds (not days): DEFAULT_RANGE is a plain Integer and @time_to
     # is a Time, so this is correct arithmetic.
-    time_from.nil? ? @time_to - DEFAULT_RANGE : Time.iso8601(time_from)
+    time_from.blank? ? @time_to - DEFAULT_RANGE : Time.iso8601(time_from)
   end
 
   def fetch_stats

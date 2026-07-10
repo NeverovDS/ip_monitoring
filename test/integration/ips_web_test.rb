@@ -51,6 +51,13 @@ class IpsWebTest < ActionDispatch::IntegrationTest
     assert_select "h1", /Stats/
   end
 
+  test "stats page handles a submitted-but-empty range" do
+    ip = Ip.create!(ip_address: "8.8.8.8")
+    # The form always submits time_from/time_to, as empty strings when unfilled.
+    get stats_ip_path(ip), params: { time_from: "", time_to: "", commit: "Apply" }, headers: AUTH
+    assert_response :ok
+  end
+
   test "stats page shows validation error for bad range" do
     ip = Ip.create!(ip_address: "8.8.8.8")
     get stats_ip_path(ip), params: { time_from: "zzz" }, headers: AUTH
