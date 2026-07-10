@@ -1,0 +1,5 @@
+schedule:
+  ip_check:
+    cron: '* * * * *'
+    class: IpCheckWorker
+    queue: default
