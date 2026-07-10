@@ -10,6 +10,10 @@ module BasicAuthenticatable
   private
 
   def authenticate
+    # Skip auth locally so Hotwire/Turbo (and the preview) aren't blocked by
+    # HTTP Basic. Auth stays on in test (so specs verify it) and production.
+    return if Rails.env.development?
+
     authenticate_or_request_with_http_basic("Application") do |username, password|
       expected_user = ENV.fetch("ADMIN_USERNAME", "admin")
       expected_pass = ENV.fetch("ADMIN_PASSWORD", "admin")
