@@ -13,3 +13,10 @@ end
 Sidekiq.configure_client do |config|
   config.redis = { url: redis_url }
 end
+
+# Protect the /sidekiq dashboard with the same Basic Auth credentials.
+require "sidekiq/web"
+Sidekiq::Web.use(Rack::Auth::Basic) do |username, password|
+  ActiveSupport::SecurityUtils.secure_compare(username, ENV.fetch("ADMIN_USERNAME", "admin")) &
+    ActiveSupport::SecurityUtils.secure_compare(password, ENV.fetch("ADMIN_PASSWORD", "admin"))
+end

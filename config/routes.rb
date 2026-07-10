@@ -1,14 +1,24 @@
-Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+require "sidekiq/web"
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  # JSON API — kept from the Roda version, isolated in its own versioned
+  # namespace instead of sharing controllers with the HTML UI via respond_to.
+  namespace :api do
+    namespace :v1 do
+      resources :ips, only: %i[index show create destroy] do
+        member do
+          post :enable
+          post :disable
+          get :stats
+        end
+      end
+    end
+  end
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # Sidekiq dashboard (Basic Auth applied in config/initializers/sidekiq.rb).
+  mount Sidekiq::Web => "/sidekiq"
+
+  # HTML web UI is added in the next step.
 end
