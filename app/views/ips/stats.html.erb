@@ -5,11 +5,11 @@
 <%= form_with url: stats_ip_path(@ip), method: :get, class: "range-form" do |f| %>
   <div class="field">
     <%= f.label :time_from, "From" %>
-    <%= f.text_field :time_from, value: params[:time_from], placeholder: "2026-07-10T00:00:00", class: "mono" %>
+    <%= f.datetime_local_field :time_from, value: params[:time_from] %>
   </div>
   <div class="field">
     <%= f.label :time_to, "To" %>
-    <%= f.text_field :time_to, value: params[:time_to], placeholder: "2026-07-10T23:59:59", class: "mono" %>
+    <%= f.datetime_local_field :time_to, value: params[:time_to] %>
   </div>
   <%= f.submit "Apply", class: "btn" %>
 <% end %>

@@ -62,7 +62,8 @@ h2 { font-size: 1.05rem; margin: 0 0 0.75rem; }
 .field.checkbox { display: flex; align-items: center; gap: 0.5rem; }
 .field.checkbox label { margin: 0; }
 
-input[type="text"] {
+input[type="text"],
+input[type="datetime-local"] {
   width: 100%;
   max-width: 320px;
   padding: 0.55rem 0.7rem;
@@ -70,8 +71,11 @@ input[type="text"] {
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--text);
+  color-scheme: dark; /* render the native date/time picker in dark mode */
+  font-family: inherit;
 }
-input[type="text"]:focus { outline: none; border-color: var(--accent); }
+input[type="text"]:focus,
+input[type="datetime-local"]:focus { outline: none; border-color: var(--accent); }
 
 .btn {
   display: inline-block;
