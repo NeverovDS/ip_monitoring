@@ -27,6 +27,15 @@
 <% elsif @stats[:error] %>
   <p class="empty"><%= @stats[:error] %></p>
 <% else %>
+  <% if @series.present? %>
+    <div class="chart-wrap"
+         data-controller="chart"
+         data-chart-labels-value="<%= @series.map { |t, _| t.strftime("%H:%M:%S") }.to_json %>"
+         data-chart-points-value="<%= @series.map { |_, rtt| rtt&.round(2) }.to_json %>">
+      <canvas data-chart-target="canvas"></canvas>
+    </div>
+  <% end %>
+
   <table class="stats">
     <% @stats.each do |key, value| %>
       <tr>

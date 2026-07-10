@@ -66,7 +66,10 @@ class IpsController < ApplicationController
 
   def stats
     @range = TimeRange.new(time_from: params[:time_from], time_to: params[:time_to])
-    @stats = IpStatsService.new(@ip.id, params[:time_from], params[:time_to]).call if @range.valid?
+    return unless @range.valid?
+
+    @stats = IpStatsService.new(@ip.id, params[:time_from], params[:time_to]).call
+    @series = rtt_series
   end
 
   # Renders only a Turbo Frame with the last-hour RTT summary. The index loads
@@ -80,6 +83,13 @@ class IpsController < ApplicationController
 
   def set_ip
     @ip = Ip.find(params[:id])
+  end
+
+  # RTT points for the chart over the same window the stats table uses.
+  def rtt_series
+    to   = @range.to || Time.current
+    from = @range.from || (to - 1.hour)
+    @ip.ip_checks.where(created_at: from..to).order(:created_at).pluck(:created_at, :rtt)
   end
 
   def ip_params

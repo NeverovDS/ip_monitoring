@@ -140,6 +140,8 @@ table.ips th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.
 .inline-edit .btn { padding: 0.3rem 0.6rem; }
 .inline-error { color: var(--red); font-size: 0.8rem; width: 100%; }
 
+.chart-wrap { height: 260px; max-width: 640px; margin: 0 0 1.75rem; }
+
 .range-form { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1.5rem; }
 .range-form .field { margin-bottom: 0; }
 .range-form .btn { height: 2.5rem; }
