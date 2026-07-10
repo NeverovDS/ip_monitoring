@@ -32,6 +32,7 @@ body {
 
 .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
 .muted { color: var(--muted); font-size: 0.85rem; }
+.hint { color: var(--muted); font-size: 0.85rem; margin: -0.5rem 0 1.25rem; }
 
 .topbar {
   display: flex;

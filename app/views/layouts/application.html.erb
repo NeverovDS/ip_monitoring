@@ -34,7 +34,10 @@
 
     <main class="container">
       <% flash.each do |type, message| %>
-        <div class="flash flash-<%= type %>"><%= message %></div>
+        <div class="flash flash-<%= type %>"
+             data-controller="flash"
+             data-action="click->flash#dismiss"
+             title="Click to dismiss"><%= message %></div>
       <% end %>
 
       <%= yield %>
