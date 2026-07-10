@@ -26,6 +26,9 @@ gem "sidekiq-cron"
 # IP address parsing/validation for the availability checks
 gem "ipaddress"
 
+# ICMP availability checks (shells out to the system ping)
+gem "net-ping"
+
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
 

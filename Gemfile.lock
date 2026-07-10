@@ -183,6 +183,7 @@ GEM
     net-imap (0.6.4.1)
       date
       net-protocol
+    net-ping (2.0.8)
     net-pop (0.1.2)
       net-protocol
     net-protocol (0.2.2)
@@ -403,6 +404,7 @@ DEPENDENCIES
   ipaddress
   jbuilder
   kamal
+  net-ping
   pg (~> 1.1)
   propshaft
   puma (>= 5.0)
