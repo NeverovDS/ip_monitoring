@@ -1,0 +1,26 @@
+<% content_for :title, "IP Monitoring" %>
+
+<h1>Monitored IPs</h1>
+
+<section class="card">
+  <h2>Add an IP</h2>
+  <%= render "form", ip: @ip %>
+</section>
+
+<table class="ips">
+  <thead>
+    <tr>
+      <th>IP address</th>
+      <th>Monitoring</th>
+      <th>Toggle</th>
+      <th class="actions-col">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if @ips.any? %>
+      <%= render @ips %>
+    <% else %>
+      <tr><td colspan="4" class="empty">No IPs yet — add one above.</td></tr>
+    <% end %>
+  </tbody>
+</table>

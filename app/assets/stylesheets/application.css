@@ -8,3 +8,128 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+:root {
+  --bg: #0f1720;
+  --panel: #17212b;
+  --border: #2a3947;
+  --text: #e6edf3;
+  --muted: #9fb0c0;
+  --accent: #3b82f6;
+  --green: #22c55e;
+  --red: #ef4444;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.5rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+.topbar .brand { font-weight: 700; font-size: 1.1rem; color: var(--text); text-decoration: none; }
+.topbar nav a { color: var(--muted); text-decoration: none; margin-left: 1.25rem; }
+.topbar nav a:hover { color: var(--text); }
+
+.container { max-width: 880px; margin: 2rem auto; padding: 0 1.5rem; }
+
+h1 { font-size: 1.5rem; margin: 0 0 1.25rem; }
+h2 { font-size: 1.05rem; margin: 0 0 0.75rem; }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.field { margin-bottom: 0.85rem; }
+.field label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.3rem; }
+.field.checkbox { display: flex; align-items: center; gap: 0.5rem; }
+.field.checkbox label { margin: 0; }
+
+input[type="text"] {
+  width: 100%;
+  max-width: 320px;
+  padding: 0.55rem 0.7rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+}
+input[type="text"]:focus { outline: none; border-color: var(--accent); }
+
+.btn {
+  display: inline-block;
+  padding: 0.45rem 0.8rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.danger:hover { border-color: var(--red); color: var(--red); }
+form.button_to { display: inline; }
+
+table { width: 100%; border-collapse: collapse; }
+table.ips th, table.ips td {
+  text-align: left;
+  padding: 0.7rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+table.ips th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.actions a { color: var(--accent); text-decoration: none; margin-right: 0.75rem; }
+.actions a:hover { text-decoration: underline; }
+.empty { color: var(--muted); text-align: center; padding: 1.5rem; }
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  border: 1px solid transparent;
+}
+.badge.on { color: var(--green); border-color: var(--green); }
+.badge.off { color: var(--muted); border-color: var(--border); }
+
+.flash {
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--border);
+}
+.flash-notice { border-color: var(--green); color: var(--green); }
+.flash-alert { border-color: var(--red); color: var(--red); }
+
+.errors {
+  border: 1px solid var(--red);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  color: var(--red);
+}
+.errors ul { margin: 0.35rem 0; padding-left: 1.2rem; }
+
+.range-form { display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1.5rem; }
+table.stats { max-width: 380px; }
+table.stats th, table.stats td { padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); text-align: left; }
+table.stats th { color: var(--muted); font-weight: 500; }

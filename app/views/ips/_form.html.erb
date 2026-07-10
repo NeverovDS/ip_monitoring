@@ -1,0 +1,23 @@
+<%= form_with model: ip do |f| %>
+  <% if ip.errors.any? %>
+    <div class="errors">
+      <ul>
+        <% ip.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :ip_address %>
+    <%= f.text_field :ip_address, placeholder: "8.8.8.8", class: "mono" %>
+  </div>
+
+  <div class="field checkbox">
+    <%= f.check_box :enabled %>
+    <%= f.label :enabled, "Enable monitoring" %>
+  </div>
+
+  <%= f.submit class: "btn primary" %>
+<% end %>

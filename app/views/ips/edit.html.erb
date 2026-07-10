@@ -1,0 +1,7 @@
+<% content_for :title, "Edit IP" %>
+
+<h1>Edit <%= @ip.ip_address %></h1>
+
+<%= render "form", ip: @ip %>
+
+<%= link_to "Back to list", ips_path %>

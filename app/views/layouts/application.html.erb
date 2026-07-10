@@ -24,6 +24,20 @@
   </head>
 
   <body>
-    <%= yield %>
+    <header class="topbar">
+      <%= link_to "IP Monitoring", root_path, class: "brand" %>
+      <nav>
+        <%= link_to "IPs", ips_path %>
+        <a href="/sidekiq">Sidekiq</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <% flash.each do |type, message| %>
+        <div class="flash flash-<%= type %>"><%= message %></div>
+      <% end %>
+
+      <%= yield %>
+    </main>
   </body>
 </html>

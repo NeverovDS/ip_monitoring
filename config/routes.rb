@@ -20,5 +20,14 @@ Rails.application.routes.draw do
   # Sidekiq dashboard (Basic Auth applied in config/initializers/sidekiq.rb).
   mount Sidekiq::Web => "/sidekiq"
 
-  # HTML web UI is added in the next step.
+  # HTML web UI.
+  resources :ips do
+    member do
+      post :enable
+      post :disable
+      get :stats
+    end
+  end
+
+  root "ips#index"
 end
