@@ -26,11 +26,15 @@ class IpsWebTest < ActionDispatch::IntegrationTest
     assert_select ".errors"
   end
 
-  test "edit and update" do
+  test "edit renders an inline form in the address frame" do
     ip = Ip.create!(ip_address: "8.8.8.8")
     get edit_ip_path(ip), headers: AUTH
     assert_response :ok
+    assert_select "turbo-frame#address_ip_#{ip.id} form input[name=?]", "ip[ip_address]"
+  end
 
+  test "update changes the ip and redirects" do
+    ip = Ip.create!(ip_address: "8.8.8.8")
     patch ip_path(ip), params: { ip: { ip_address: "9.9.9.9" } }, headers: AUTH
     assert_redirected_to ips_path
     assert_equal "9.9.9.9", ip.reload.ip_address.to_s

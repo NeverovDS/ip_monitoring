@@ -134,6 +134,11 @@ table.ips th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.
 }
 .errors ul { margin: 0.35rem 0; padding-left: 1.2rem; }
 
+.inline-edit { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+.inline-edit input[type="text"] { max-width: 150px; padding: 0.3rem 0.5rem; }
+.inline-edit .btn { padding: 0.3rem 0.6rem; }
+.inline-error { color: var(--red); font-size: 0.8rem; width: 100%; }
+
 .range-form { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1.5rem; }
 .range-form .field { margin-bottom: 0; }
 .range-form .btn { height: 2.5rem; }

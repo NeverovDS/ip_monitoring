@@ -1,7 +1,14 @@
-<% content_for :title, "Edit IP" %>
+<% content_for :title, "Edit #{@ip.ip_address}" %>
 
-<h1>Edit <%= @ip.ip_address %></h1>
-
-<%= render "form", ip: @ip %>
-
-<%= link_to "Back to list", ips_path %>
+<%# Same frame id as the row's address cell: Turbo swaps this form in place of
+    the address, and swaps the updated address back after a successful save. %>
+<%= turbo_frame_tag dom_id(@ip, :address) do %>
+  <%= form_with model: @ip, class: "inline-edit" do |f| %>
+    <%= f.text_field :ip_address, class: "mono" %>
+    <%= f.submit "Save", class: "btn primary" %>
+    <%= link_to "Cancel", ips_path, class: "btn" %>
+    <% if @ip.errors.any? %>
+      <span class="inline-error"><%= @ip.errors.full_messages_for(:ip_address).to_sentence %></span>
+    <% end %>
+  <% end %>
+<% end %>

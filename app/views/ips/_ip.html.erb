@@ -1,7 +1,13 @@
 <%# dom_id(ip) -> "ip_42": gives each row a stable id that Turbo Streams
     and broadcasts will target in later steps. %>
 <tr id="<%= dom_id(ip) %>">
-  <td class="mono"><%= ip.ip_address %></td>
+  <td class="mono">
+    <%# The Edit link targets this frame (data-turbo-frame), so clicking it
+        swaps only this cell into an inline form — the rest of the row stays. %>
+    <%= turbo_frame_tag dom_id(ip, :address) do %>
+      <%= ip.ip_address %>
+    <% end %>
+  </td>
   <td>
     <span class="badge <%= ip.enabled ? "on" : "off" %>">
       <%= ip.enabled ? "enabled" : "disabled" %>
@@ -24,7 +30,7 @@
   </td>
   <td class="actions">
     <%= link_to "Stats", stats_ip_path(ip) %>
-    <%= link_to "Edit", edit_ip_path(ip) %>
+    <%= link_to "Edit", edit_ip_path(ip), data: { turbo_frame: dom_id(ip, :address) } %>
     <%= button_to "Delete", ip_path(ip), method: :delete, class: "btn danger",
           form: { data: { turbo_confirm: "Remove #{ip.ip_address}?" } } %>
   </td>
