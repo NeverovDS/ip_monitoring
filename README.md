@@ -1,19 +1,14 @@
-
-## Mini APP: IP Monitoring Service
+# IP Monitoring Service
 
 A service for monitoring the availability of IP addresses with a REST API and real-time statistics calculation.
 
-## Description
+## Stack
 
-Backend: Ruby 3.4.2, Roda
-
-Database: PostgreSQL, Sequel ORM
-
-Job queues: Sidekiq, Redis
-
-Validation: dry-validation, dry-types
-
-Containerization: Docker, Docker Compose
+- **Backend:** Ruby 3.4.2, Roda
+- **Database:** PostgreSQL, Sequel ORM
+- **Job queues:** Sidekiq, Redis
+- **Validation:** dry-validation, dry-types
+- **Containerization:** Docker, Docker Compose
 
 ## Features
 Adding and removing IP addresses
