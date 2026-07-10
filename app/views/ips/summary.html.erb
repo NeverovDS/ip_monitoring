@@ -1,9 +1,1 @@
-<%# The frame id must match the lazy frame in the row so Turbo can swap it in. %>
-<%= turbo_frame_tag dom_id(@ip, :stats) do %>
-  <% if @stats[:error] %>
-    <span class="muted">no data yet</span>
-  <% else %>
-    <span class="mono"><%= @stats["avg_rtt"] %> ms</span>
-    <span class="muted">· loss <%= @stats["packet_loss"] %>%</span>
-  <% end %>
-<% end %>
+<%= render "summary_frame", ip: @ip, stats: @stats %>

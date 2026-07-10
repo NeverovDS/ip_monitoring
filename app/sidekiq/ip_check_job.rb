@@ -9,9 +9,24 @@ class IpCheckJob
 
     records = build_records(check_ips(addresses), id_map)
     insert_records(records)
+    broadcast_summaries(ip_ids)
   end
 
   private
+
+  # Push the refreshed RTT summary for each checked IP to every open dashboard
+  # over ActionCable. This runs in the Sidekiq process, so cable.yml must use
+  # the Redis adapter (shared with Puma) — the async adapter would not reach it.
+  def broadcast_summaries(ip_ids)
+    Ip.where(id: ip_ids).find_each do |ip|
+      ip.broadcast_replace_to(
+        "ips",
+        target: ActionView::RecordIdentifier.dom_id(ip, :stats),
+        partial: "ips/summary_frame",
+        locals: { ip: ip, stats: IpStatsService.new(ip.id).call }
+      )
+    end
+  end
 
   def fetch_ip_pairs(ids)
     # pluck avoids instantiating models; inet values come back as IPAddr,

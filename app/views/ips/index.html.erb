@@ -1,5 +1,9 @@
 <% content_for :title, "IP Monitoring" %>
 
+<%# Subscribe this page (over ActionCable/WebSocket) to the "ips" stream, so
+    broadcasts from the background worker update rows with no browser request. %>
+<%= turbo_stream_from "ips" %>
+
 <h1>Monitored IPs</h1>
 
 <section class="card">
