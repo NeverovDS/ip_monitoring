@@ -13,6 +13,7 @@
       <th>IP address</th>
       <th>Monitoring</th>
       <th>Toggle</th>
+      <th>RTT (1h)</th>
       <th class="actions-col">Actions</th>
     </tr>
   </thead>
@@ -20,7 +21,7 @@
     <% if @ips.any? %>
       <%= render @ips %>
     <% else %>
-      <tr><td colspan="4" class="empty">No IPs yet — add one above.</td></tr>
+      <tr><td colspan="5" class="empty">No IPs yet — add one above.</td></tr>
     <% end %>
   </tbody>
 </table>

@@ -44,6 +44,13 @@ class IpsWebTest < ActionDispatch::IntegrationTest
     assert_not ip.reload.enabled
   end
 
+  test "summary returns a turbo frame for the row" do
+    ip = Ip.create!(ip_address: "8.8.8.8")
+    get summary_ip_path(ip), headers: AUTH
+    assert_response :ok
+    assert_select "turbo-frame#stats_ip_#{ip.id}"
+  end
+
   test "stats page renders" do
     ip = Ip.create!(ip_address: "8.8.8.8")
     get stats_ip_path(ip), headers: AUTH

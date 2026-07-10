@@ -26,6 +26,7 @@ Rails.application.routes.draw do
       post :enable
       post :disable
       get :stats
+      get :summary # compact last-hour RTT, loaded lazily into each list row
     end
   end
 

@@ -1,5 +1,5 @@
 class IpsController < ApplicationController
-  before_action :set_ip, only: %i[edit update destroy enable disable stats]
+  before_action :set_ip, only: %i[edit update destroy enable disable stats summary]
 
   def index
     @ips = Ip.order(:id)
@@ -51,6 +51,13 @@ class IpsController < ApplicationController
   def stats
     @range = TimeRange.new(time_from: params[:time_from], time_to: params[:time_to])
     @stats = IpStatsService.new(@ip.id, params[:time_from], params[:time_to]).call if @range.valid?
+  end
+
+  # Renders only a Turbo Frame with the last-hour RTT summary. The index loads
+  # this lazily per row, so the (relatively expensive) stats query runs once per
+  # visible row in its own request instead of blocking the main page render.
+  def summary
+    @stats = IpStatsService.new(@ip.id).call
   end
 
   private

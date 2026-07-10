@@ -14,6 +14,14 @@
       <%= button_to "Enable", enable_ip_path(ip), class: "btn primary" %>
     <% end %>
   </td>
+  <td>
+    <%# loading: :lazy -> Turbo fetches summary_ip_path only when this frame
+        scrolls into view, in its own request. Until then it shows the
+        placeholder below. The response frame's id must match this one. %>
+    <%= turbo_frame_tag dom_id(ip, :stats), src: summary_ip_path(ip), loading: :lazy do %>
+      <span class="muted">…</span>
+    <% end %>
+  </td>
   <td class="actions">
     <%= link_to "Stats", stats_ip_path(ip) %>
     <%= link_to "Edit", edit_ip_path(ip) %>
