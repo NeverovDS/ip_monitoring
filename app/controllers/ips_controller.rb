@@ -65,6 +65,9 @@ class IpsController < ApplicationController
   end
 
   def stats
+    # Recent enable/disable events, recorded by the ip_status_change_trigger.
+    @status_changes = @ip.ip_status_changes.order(created_at: :desc).limit(10)
+
     @range = TimeRange.new(time_from: params[:time_from], time_to: params[:time_to])
     return unless @range.valid?
 

@@ -84,6 +84,13 @@ class IpsWebTest < ActionDispatch::IntegrationTest
     assert_select "h1", /Stats/
   end
 
+  test "stats page lists status history recorded by the trigger" do
+    ip = Ip.create!(ip_address: "8.8.8.8", enabled: true) # trigger logs the event
+    get stats_ip_path(ip), headers: AUTH
+    assert_response :ok
+    assert_select "section.history .history-list li", minimum: 1
+  end
+
   test "stats page handles a submitted-but-empty range" do
     ip = Ip.create!(ip_address: "8.8.8.8")
     # The form always submits time_from/time_to, as empty strings when unfilled.

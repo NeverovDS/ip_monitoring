@@ -46,4 +46,20 @@
   </table>
 <% end %>
 
+<% if @status_changes.any? %>
+  <section class="history">
+    <h2>Status history</h2>
+    <ul class="history-list">
+      <% @status_changes.each do |change| %>
+        <li>
+          <span class="badge <%= change.status ? "on" : "off" %>">
+            <%= change.status ? "enabled" : "disabled" %>
+          </span>
+          <span class="muted mono"><%= change.created_at.strftime("%Y-%m-%d %H:%M:%S") %></span>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>
+
 <p><%= link_to "Back to list", ips_path %></p>
