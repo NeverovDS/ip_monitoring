@@ -36,6 +36,8 @@
     </div>
   <% end %>
 
+  <p class="muted">All values below are in milliseconds (ms), except packet loss (%).</p>
+
   <table class="stats">
     <% @stats.each do |key, value| %>
       <tr>
@@ -44,6 +46,17 @@
       </tr>
     <% end %>
   </table>
+
+  <dl class="legend">
+    <dt>Avg / Min / Max rtt</dt>
+    <dd>Average, best and worst round-trip time over the selected range.</dd>
+    <dt>Median rtt</dt>
+    <dd>The middle value — less skewed by occasional spikes than the average.</dd>
+    <dt>Std dev rtt</dt>
+    <dd>How much the latency fluctuates (jitter). Higher means less stable.</dd>
+    <dt>Packet loss</dt>
+    <dd>Share of checks that got no reply (%). 0 means the host was always reachable.</dd>
+  </dl>
 <% end %>
 
 <% if @status_changes.any? %>
