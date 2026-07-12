@@ -66,33 +66,26 @@ class IpsController < ApplicationController
 
   def stats
     # Recent enable/disable events, recorded by the ip_status_change_trigger.
-    @status_changes = @ip.ip_status_changes.order(created_at: :desc).limit(10)
+    @status_changes = @ip.ip_status_changes.recent
 
     @range = TimeRange.new(time_from: params[:time_from], time_to: params[:time_to])
     return unless @range.valid?
 
-    @stats = IpStatsService.new(@ip.id, params[:time_from], params[:time_to]).call
-    @series = rtt_series
+    @stats  = IpStatsService.new(@ip.id, *@range.window).call
+    @series = @ip.ip_checks.rtt_points(*@range.window)
   end
 
   # Renders only a Turbo Frame with the last-hour RTT summary. The index loads
   # this lazily per row, so the (relatively expensive) stats query runs once per
   # visible row in its own request instead of blocking the main page render.
   def summary
-    @stats = IpStatsService.new(@ip.id).call
+    @stats = IpStatsService.new(@ip.id, *TimeRange.new.window).call
   end
 
   private
 
   def set_ip
     @ip = Ip.find(params[:id])
-  end
-
-  # RTT points for the chart over the same window the stats table uses.
-  def rtt_series
-    to   = @range.to || Time.current
-    from = @range.from || (to - 1.hour)
-    @ip.ip_checks.where(created_at: from..to).order(:created_at).pluck(:created_at, :rtt)
   end
 
   def ip_params

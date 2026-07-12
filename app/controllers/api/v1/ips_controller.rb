@@ -43,7 +43,7 @@ module Api
           return render_error(:validation_error, range.errors.to_hash, status: :unprocessable_content)
         end
 
-        stats = IpStatsService.new(@ip.id, params[:time_from], params[:time_to]).call
+        stats = IpStatsService.new(@ip.id, *range.window).call
         render json: IpStatsSerializer.new(stats).call
       end
 

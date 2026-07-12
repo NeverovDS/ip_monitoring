@@ -23,7 +23,7 @@ class IpCheckJob
         "ips",
         target: ActionView::RecordIdentifier.dom_id(ip, :stats),
         partial: "ips/summary_frame",
-        locals: { ip: ip, stats: IpStatsService.new(ip.id).call }
+        locals: { ip: ip, stats: IpStatsService.new(ip.id, *TimeRange.new.window).call }
       )
     end
   end

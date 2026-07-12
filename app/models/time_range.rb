@@ -4,6 +4,11 @@
 class TimeRange
   include ActiveModel::Model
 
+  # Default lookback when "from" (or "to") is omitted. Single source of truth
+  # for the stats window — used by the web/API controllers, the summary frame,
+  # and the background job (via `TimeRange.new.window`).
+  DEFAULT_WINDOW = 1.hour
+
   attr_accessor :time_from, :time_to
 
   validate :time_from_is_parseable
@@ -16,6 +21,21 @@ class TimeRange
 
   def to
     parse(time_to)
+  end
+
+  # Effective bounds with defaults applied: blank "to" → now, blank "from" →
+  # DEFAULT_WINDOW before "to".
+  def effective_to
+    to || Time.current
+  end
+
+  def effective_from
+    from || (effective_to - DEFAULT_WINDOW)
+  end
+
+  # [from, to] ready to splat into IpStatsService / IpCheck.rtt_points.
+  def window
+    [effective_from, effective_to]
   end
 
   private

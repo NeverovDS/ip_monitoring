@@ -3,4 +3,7 @@ class IpStatusChange < ApplicationRecord
   # whenever an Ip is created or its `enabled` flag flips — treat as
   # append-only history.
   belongs_to :ip
+
+  # Most-recent status flips first, capped for the stats history panel.
+  scope :recent, -> { order(created_at: :desc).limit(10) }
 end

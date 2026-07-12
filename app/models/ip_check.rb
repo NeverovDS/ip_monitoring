@@ -1,6 +1,15 @@
 class IpCheck < ApplicationRecord
   belongs_to :ip
 
+  # Checks within a time window, oldest first.
+  scope :in_window, ->(from, to) { where(created_at: from..to).order(:created_at) }
+
+  # [created_at, rtt] pairs for charting over a window (keeps the query out of
+  # the controller). Call on a scoped relation, e.g. `ip.ip_checks.rtt_points(from, to)`.
+  def self.rtt_points(from, to)
+    in_window(from, to).pluck(:created_at, :rtt)
+  end
+
   # Aggregate RTT stats for one IP over a time range, in a single query.
   # No enabled-at-check-time filter is needed: IpCheckWorker only ever checks
   # enabled IPs, so every row already belongs to an active period.
