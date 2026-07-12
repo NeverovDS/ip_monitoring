@@ -1,8 +1,9 @@
 class Ip < ApplicationRecord
-  # ip_checks and ip_status_changes are removed by the DB foreign keys
-  # (ON DELETE CASCADE), so no `dependent:` option is needed here.
-  has_many :ip_checks
-  has_many :ip_status_changes
+  # dependent: :delete_all so `collection.delete_all` issues a real DELETE — the
+  # Rails default nullifies ip_id, which the NOT NULL column rejects. The DB also
+  # has ON DELETE CASCADE as a backstop for deletes that bypass Active Record.
+  has_many :ip_checks, dependent: :delete_all
+  has_many :ip_status_changes, dependent: :delete_all
 
   # Reserved / non-routable ranges we refuse to monitor.
   FORBIDDEN_RANGES = %w[

@@ -5,12 +5,10 @@ class IpStatusChangeTest < ActiveSupport::TestCase
 
   test "recent returns the newest changes first, capped at 10" do
     ip = Ip.create!(ip_address: "8.8.8.8")
-    IpStatusChange.where(ip: ip).delete_all # drop the row the DB trigger auto-inserted
+    ip.ip_status_changes.delete_all # drop the row the DB trigger auto-inserted
 
     now = Time.current
-    # Create via the class with an explicit ip: the association proxy
-    # (ip.ip_status_changes.create) intermittently leaves ip_id null here.
-    12.times { |i| IpStatusChange.create!(ip: ip, status: i.even?, created_at: now - i.minutes) }
+    12.times { |i| ip.ip_status_changes.create!(status: i.even?, created_at: now - i.minutes) }
 
     recent = ip.ip_status_changes.recent
     assert_equal 10, recent.size
