@@ -3,16 +3,17 @@
 
 service: ip_monitoring
 
-# Image name on the registry. Replace morteo12 with your Docker Hub username.
+# Image repository name (the ECR registry host is set under `registry:`).
 image: ip_monitoring
 
-# Target servers. web = Puma (via Thruster); job = Sidekiq worker. Same host for now.
+# Target servers, addressed by EC2 instance id and reached over an SSM tunnel
+# (see ~/.ssh/config ProxyCommand). web = Puma (via Thruster); job = Sidekiq.
 servers:
   web:
-    - 51.20.162.241
+    - i-0255797bc34a5c6eb
   job:
     hosts:
-      - 51.20.162.241
+      - i-0255797bc34a5c6eb
     cmd: bundle exec sidekiq
 
 # kamal-proxy sits in front on ports 80/443. Stage 1: plain HTTP (no domain yet).
@@ -70,7 +71,7 @@ aliases:
 accessories:
   redis:
     image: redis:7
-    host: 51.20.162.241
+    host: i-0255797bc34a5c6eb
     port: "127.0.0.1:6379:6379"
     directories:
       - data:/data
