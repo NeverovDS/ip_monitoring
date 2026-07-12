@@ -1,21 +1,6 @@
-require_relative './config/application'
-require './app/api'
-require 'sidekiq/web'
-require 'rack/session/cookie'
+# This file is used by Rack-based servers to start the application.
 
-use Rack::Session::Cookie,
-  secret: ENV['SESSION_SECRET'] || SecureRandom.hex(32),
-  same_site: true,
-  max_age: 86_400
+require_relative "config/environment"
 
-use Rack::Auth::Basic, 'Protected Area' do |username, password|
-  username == ENV['ADMIN_USERNAME'] && password == ENV['ADMIN_PASSWORD']
-end
-
-map '/' do
-  run API
-end
-
-map '/sidekiq' do
-  run Sidekiq::Web
-end
+run Rails.application
+Rails.application.load_server

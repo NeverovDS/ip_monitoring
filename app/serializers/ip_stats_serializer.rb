@@ -2,6 +2,6 @@ class IpStatsSerializer < BaseSerializer
   private
 
   def serialize(stats)
-    stats.transform_values { |v| v.is_a?(Float) ? v.round(2) : v }
+    stats.transform_values { |value| value.is_a?(Float) ? value.round(2) : value }
   end
 end

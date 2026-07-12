@@ -1,0 +1,76 @@
+# Kamal deploy config — single EC2 host, Postgres + Redis as accessories.
+# Secrets come from .kamal/secrets (which reads them from ENV / files).
+
+service: ip_monitoring
+
+# Image name on the registry. Replace morteo12 with your Docker Hub username.
+image: ip_monitoring
+
+# Target servers. web = Puma (via Thruster); job = Sidekiq worker. Same host for now.
+servers:
+  web:
+    - 51.20.162.241
+  job:
+    hosts:
+      - 51.20.162.241
+    cmd: bundle exec sidekiq
+
+# kamal-proxy sits in front on ports 80/443. Stage 1: plain HTTP (no domain yet).
+proxy:
+  ssl: false
+  app_port: 80
+  healthcheck:
+    path: /up
+
+# Container registry: AWS ECR (private, same account/region as the server).
+# Username is the literal "AWS"; the password is a 12h token from
+# `aws ecr get-login-password` (see .kamal/secrets) — no long-lived secret.
+registry:
+  server: 535450902063.dkr.ecr.eu-north-1.amazonaws.com
+  username: AWS
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+# Build the image for the server's CPU arch. EC2 is Graviton (ARM) → arm64,
+# which matches the Apple Silicon build host (native build, no emulation).
+builder:
+  arch: arm64
+
+# SSH into the EC2 host. Ubuntu AMIs disable root login: connect as "ubuntu"
+# (passwordless sudo) with our key. keys_only avoids the agent offering others.
+ssh:
+  user: ubuntu
+  keys:
+    - "~/.ssh/ipmon-key.pem"
+  keys_only: true
+
+# Env for all roles (web + job). Non-secret values inline, secrets by name.
+env:
+  clear:
+    DB_HOST: ipmon-db.cj2kayq06781.eu-north-1.rds.amazonaws.com
+    DB_PORT: 5432
+    REDIS_URL: redis://ip_monitoring-redis:6379/0
+    RAILS_LOG_TO_STDOUT: "1"
+  secret:
+    - RAILS_MASTER_KEY
+    - IP_MONITORING_DATABASE_PASSWORD
+    - ADMIN_USERNAME
+    - ADMIN_PASSWORD
+
+# Handy shortcuts: bin/kamal console / shell / logs / dbc
+aliases:
+  console: app exec --interactive --reuse "bin/rails console"
+  shell: app exec --interactive --reuse "bash"
+  logs: app logs -f
+  dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
+
+# Redis runs as a container on the host (shared "kamal" network, reached by
+# name). Postgres now lives in AWS RDS — see env.DB_HOST — not as an accessory.
+# The port is bound to 127.0.0.1 only, never exposed to the internet.
+accessories:
+  redis:
+    image: redis:7
+    host: 51.20.162.241
+    port: "127.0.0.1:6379:6379"
+    directories:
+      - data:/data

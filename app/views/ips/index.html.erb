@@ -1,0 +1,54 @@
+<% content_for :title, "IP Monitoring" %>
+
+<%# Subscribe this page (over ActionCable/WebSocket) to the "ips" stream, so
+    broadcasts from the background worker update rows with no browser request. %>
+<%= turbo_stream_from "ips" %>
+
+<h1>Monitored IPs</h1>
+
+<section class="card intro">
+  <h2>What this is</h2>
+  <p>
+    IP Monitoring pings a list of IP addresses once a minute and records how quickly
+    each one responds. Add an address below and its round-trip time updates here live
+    over WebSocket — no page reload. Open <strong>Stats</strong> on any row for latency
+    history and a chart.
+  </p>
+  <ul class="muted intro-points">
+    <li><strong>RTT</strong> (round-trip time) — reply time in milliseconds; lower is better. <span class="mono">—</span> means no reply (packet loss).</li>
+    <li>Checks run every minute in the background; each row refreshes itself.</li>
+    <li>Turn <strong>Monitoring</strong> off to pause checks for an address without losing its history.</li>
+  </ul>
+</section>
+
+<p class="hint" data-controller="countdown">
+  Next scheduled check in <span data-countdown-target="output">–</span>s
+</p>
+
+<section class="card">
+  <h2>Add an IP</h2>
+  <%# id target so the create stream can reset (update) this form in place. %>
+  <div id="new_ip_form">
+    <%= render "form", ip: @ip %>
+  </div>
+</section>
+
+<table class="ips">
+  <thead>
+    <tr>
+      <th>IP address</th>
+      <th>Monitoring</th>
+      <th>Toggle</th>
+      <th>RTT (1h)</th>
+      <th class="actions-col">Actions</th>
+    </tr>
+  </thead>
+  <%# id target for turbo_stream append/remove of rows. %>
+  <tbody id="ips">
+    <% if @ips.any? %>
+      <%= render @ips %>
+    <% else %>
+      <%= render "empty_row" %>
+    <% end %>
+  </tbody>
+</table>

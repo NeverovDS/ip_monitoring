@@ -1,0 +1,78 @@
+<% content_for :title, "Stats — #{@ip.ip_address}" %>
+
+<h1>Stats: <span class="mono"><%= @ip.ip_address %></span></h1>
+
+<%= form_with url: stats_ip_path(@ip), method: :get, class: "range-form" do |f| %>
+  <div class="field">
+    <%= f.label :time_from, "From" %>
+    <%= f.datetime_local_field :time_from, value: params[:time_from] %>
+  </div>
+  <div class="field">
+    <%= f.label :time_to, "To" %>
+    <%= f.datetime_local_field :time_to, value: params[:time_to] %>
+  </div>
+  <%= f.submit "Apply", class: "btn" %>
+<% end %>
+
+<% if @range.errors.any? %>
+  <div class="errors">
+    <ul>
+      <% @range.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% elsif @stats.nil? %>
+  <p>Enter a valid range.</p>
+<% elsif @stats[:error] %>
+  <p class="empty"><%= @stats[:error] %></p>
+<% else %>
+  <% if @series.present? %>
+    <div class="chart-wrap"
+         data-controller="chart"
+         data-chart-labels-value="<%= @series.map { |t, _| t.strftime("%H:%M:%S") }.to_json %>"
+         data-chart-points-value="<%= @series.map { |_, rtt| rtt&.round(2) }.to_json %>">
+      <canvas data-chart-target="canvas"></canvas>
+    </div>
+  <% end %>
+
+  <p class="muted">All values below are in milliseconds (ms), except packet loss (%).</p>
+
+  <table class="stats">
+    <% @stats.each do |key, value| %>
+      <tr>
+        <th><%= key.to_s.humanize %></th>
+        <td class="mono"><%= value.nil? ? "—" : value %></td>
+      </tr>
+    <% end %>
+  </table>
+
+  <dl class="legend">
+    <dt>Avg / Min / Max rtt</dt>
+    <dd>Average, best and worst round-trip time over the selected range.</dd>
+    <dt>Median rtt</dt>
+    <dd>The middle value — less skewed by occasional spikes than the average.</dd>
+    <dt>Std dev rtt</dt>
+    <dd>How much the latency fluctuates (jitter). Higher means less stable.</dd>
+    <dt>Packet loss</dt>
+    <dd>Share of checks that got no reply (%). 0 means the host was always reachable.</dd>
+  </dl>
+<% end %>
+
+<% if @status_changes.any? %>
+  <section class="history">
+    <h2>Status history</h2>
+    <ul class="history-list">
+      <% @status_changes.each do |change| %>
+        <li>
+          <span class="badge <%= change.status ? "on" : "off" %>">
+            <%= change.status ? "enabled" : "disabled" %>
+          </span>
+          <span class="muted mono"><%= change.created_at.strftime("%Y-%m-%d %H:%M:%S") %></span>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>
+
+<p><%= link_to "Back to list", ips_path %></p>

@@ -1,0 +1,10 @@
+<%# Shared by the lazy summary action and by IpCheckJob broadcasts, so both
+    render an identical frame. The id must match the row's stats frame. %>
+<%= turbo_frame_tag dom_id(ip, :stats) do %>
+  <% if stats[:error] %>
+    <span class="muted">no data yet</span>
+  <% else %>
+    <span class="mono"><%= stats["avg_rtt"] %> ms</span>
+    <span class="muted">· loss <%= stats["packet_loss"] %>%</span>
+  <% end %>
+<% end %>

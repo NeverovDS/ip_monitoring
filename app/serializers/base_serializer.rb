@@ -9,7 +9,7 @@ class BaseSerializer
 
   private
 
-  def serialize(object)
+  def serialize(_object)
     raise NotImplementedError
   end
 end

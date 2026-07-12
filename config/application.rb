@@ -1,21 +1,31 @@
-# frozen_string_literal: true
+require_relative "boot"
 
-require 'bundler/setup'
-Bundler.require(:default, ENV['RACK_ENV'] || 'development')
+require "rails/all"
 
-require 'dotenv'
-Dotenv.load
+# Require the gems listed in Gemfile, including any gems
+# you've limited to :test, :development, or :production.
+Bundler.require(*Rails.groups)
 
-require_relative 'database'
+module IpMonitoring
+  class Application < Rails::Application
+    # Initialize configuration defaults for originally generated Rails version.
+    config.load_defaults 8.1
 
-IS_SIDEKIQ = defined?(Sidekiq) && Sidekiq.server?
+    # Please, add to the `ignore` list any other `lib` subdirectories that do
+    # not contain `.rb` files, or that should not be reloaded or eager loaded.
+    # Common ones are `templates`, `generators`, or `middleware`, for example.
+    config.autoload_lib(ignore: %w[assets tasks])
 
-Dir["#{__dir__}/../app/models/*.rb"].each { |file| require file }
-Dir["#{__dir__}/../app/services/*.rb"].each { |file| require file }
-Dir["#{__dir__}/../app/workers/*.rb"].each { |file| require file }
-Dir["#{__dir__}/../app/contracts/*.rb"].each { |file| require file }
-Dir["#{__dir__}/../app/serializers/*.rb"].each { |file| require file }
+    # Dump the schema as SQL: the ruby schema.rb format cannot represent the
+    # PostgreSQL trigger/function that maintains ip_status_changes.
+    config.active_record.schema_format = :sql
 
-require_relative '../app/api'
-require_relative 'zeitwerk'
-require_relative 'sidekiq'
+    # Configuration for the application, engines, and railties goes here.
+    #
+    # These settings can be overridden in specific environments using the files
+    # in config/environments, which are processed later.
+    #
+    # config.time_zone = "Central Time (US & Canada)"
+    # config.eager_load_paths << Rails.root.join("extras")
+  end
+end

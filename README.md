@@ -1,154 +1,106 @@
-# IP Monitoring Service
+# IP Monitoring
 
-A service for monitoring the availability of IP addresses with a REST API and real-time statistics calculation.
+[![CI](https://github.com/NeverovDS/ip_monitoring/actions/workflows/deploy.yml/badge.svg)](https://github.com/NeverovDS/ip_monitoring/actions/workflows/deploy.yml)
 
-## Stack
+Real-time availability monitor for IPv4 hosts. A background worker pings every
+host once a minute, records the round-trip time, and streams the results to a
+live Hotwire dashboard — no page reloads — alongside a JSON API.
 
-- **Backend:** Ruby 3.4.2, Roda
-- **Database:** PostgreSQL, Sequel ORM
-- **Job queues:** Sidekiq, Redis
-- **Validation:** dry-validation, dry-types
-- **Containerization:** Docker, Docker Compose
+Originally built with **Roda**; migrated to **Rails 8 + Hotwire** and deployed
+to **AWS** with Kamal. The original Roda version is preserved at the
+[`v1.0-roda`](https://github.com/NeverovDS/ip_monitoring/releases/tag/v1.0-roda) tag.
 
-## Features
-Adding and removing IP addresses
+> A live instance runs on AWS — URL and demo credentials available on request.
 
-Automatic availability checks every minute
+## Highlights
 
-Statistics calculation: average/minimum/maximum RTT, median, standard deviation, packet loss percentage
+- **Live dashboard** — per-row RTT updates are pushed over WebSocket (Turbo
+  Streams + Action Cable) straight from the background worker.
+- **Concurrent checks** — a thread-pooled ICMP pinger probes every host in
+  parallel each minute (Sidekiq + sidekiq-cron).
+- **Rich statistics** — average / min / max / median / std-dev RTT and packet
+  loss, computed in a single SQL aggregate; latency chart via Stimulus + Chart.js.
+- **Status history** — enable/disable events are recorded by a PostgreSQL
+  trigger (the schema is tracked as `structure.sql`).
+- **JSON API** — versioned under `/api/v1`, HTTP Basic auth.
+- **Production deployment on AWS** — one-command zero-downtime deploys with
+  Kamal; CI/CD via GitHub Actions.
 
-History of IP address status changes
+## Architecture
 
-Background processing via Sidekiq
+```
+Developer / GitHub Actions ──build & push──▶ Amazon ECR (private image registry)
+                                                   │ pull
+                                                   ▼
+                                    EC2 (Graviton / arm64, Ubuntu, Kamal)
+                                    ├─ web   — Puma (Thruster) behind kamal-proxy :80
+                                    ├─ job   — Sidekiq worker (pings every minute)
+                                    └─ redis — Action Cable + Sidekiq broker
+                                                   │
+                                                   ▼
+                                    Amazon RDS — managed PostgreSQL (private subnet)
+```
 
-Full containerization using Docker Compose
+**CI/CD:** a push to `main` triggers GitHub Actions, which builds the arm64
+image natively, authenticates to AWS via **OIDC** (no long-lived keys), pushes
+to ECR, and runs `kamal deploy`. The test suite runs on every push and PR.
 
-## Running
+## Tech stack
 
-1. Clone the repository
-2. Start the containers:
-   ```sh
-   cd ip_monitoring
-   docker-compose up -d
-   ```
+| Area | Choice |
+|------|--------|
+| Language / framework | Ruby 3.4, Rails 8 |
+| Frontend | Hotwire (Turbo + Stimulus), Chart.js, importmap |
+| Database | PostgreSQL (SQL schema + trigger), Active Record |
+| Background jobs | Sidekiq + sidekiq-cron, Redis |
+| Web server | Puma + Thruster |
+| Deployment | Docker, Kamal 2, AWS (EC2 · RDS · ECR), GitHub Actions (OIDC) |
 
-## Basic Authentication
+## Local development
 
-All API requests require basic authentication.
-By default:
-Username: admin
-Password: admin
+Requires Ruby 3.4.2 and Docker.
+
+```sh
+docker compose up -d   # Postgres (5433) + Redis
+bin/setup              # install gems, prepare the database
+bin/rails server       # http://localhost:3000
+bundle exec sidekiq    # run the background checks
+```
+
+Run the test suite:
+
+```sh
+bin/rails test
+```
 
 ## API
 
-### GET /ips
-Retrieve a list of all IP addresses.
+All endpoints require HTTP Basic auth. In development the base URL is
+`http://localhost:3000`.
 
-**Example request:**
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/v1/ips` | List monitored IPs |
+| `POST` | `/api/v1/ips` | Add an IP — `{ "ip_address": "8.8.8.8", "enabled": true }` |
+| `GET` | `/api/v1/ips/:id` | Show one IP |
+| `DELETE` | `/api/v1/ips/:id` | Remove an IP |
+| `POST` | `/api/v1/ips/:id/enable` | Resume monitoring |
+| `POST` | `/api/v1/ips/:id/disable` | Pause monitoring |
+| `GET` | `/api/v1/ips/:id/stats` | RTT stats over `time_from` / `time_to` (default: last hour) |
+
 ```sh
-curl -u admin:admin http://localhost:9292/ips
+curl -u admin:secret http://localhost:3000/api/v1/ips
 ```
 
-**Example response:**
-```json
-[{"id":3,
-  "ip_address":"8.8.8.5",
-  "enabled":true,
-  "created_at":"2025-12-05T12:44:49+00:00",
-  "updated_at":"2025-12-05T12:44:49+00:00"
-  }
-]
-```
+The Sidekiq dashboard is available at `/sidekiq` (same Basic auth).
 
-### GET /ips/:id/stats
-Retrieve statistics for an IP address for a specified period.
+## Implementation notes
 
-**Parameters:**
-- `time_from` (optional): datetime in ISO8601 format (e.g., 2025-12-03T10:00:00)
-- `time_to` (optional): datetime in ISO8601 format (e.g., 2025-12-05T11:00:00)
-
-If the parameters are not provided, statistics for the last hour are returned.
-
-**Example request:**
-```sh
-curl -u admin:admin "http://localhost:9292/ips/1/stats?time_from=2025-11-15T10:00:00&time_to=2025-12-05T23:30:00"
-```
-
-**Example response:**
-```json
-{
-  "avg_rtt":3.15,
-  "min_rtt":3.15,
-  "max_rtt":3.15,
-  "median_rtt":3.15,
-  "std_dev_rtt":null,
-  "packet_loss":0.0
-}
-```
-
-### POST /ips/:id/enable
-Enable statistics collection for an IP.
-
-**Example request:**
-```sh
-curl -u admin:admin -X POST http://localhost:9292/ips/1/enable
-```
-
-**Example response:**
-```json
-{
-  "id":1,
-  "enabled":true
-}
-```
-
-### POST /ips/:id/disable
-Disable statistics collection for an IP.
-
-**Example request:**
-```sh
-curl -u admin:admin -X POST http://localhost:9292/ips/1/disable
-```
-
-**Example response:**
-```json
-{
-  "id":1,
-  "disabled":true
-}
-```
-
-### POST /ips
-Add a new IP address.
-
-**Example request:**
-```sh
-curl -u admin:admin -X POST -H "Content-Type: application/json" -d '{"ip_address": "8.8.8.1", "enabled": true}' http://localhost:9292/ips
-```
-
-**Example response:**
-```json
-{
-  "id":4,
-  "ip_address":"8.8.8.1",
-  "enabled":true,
-  "created_at":"2025-12-05T13:43:29+00:00",
-  "updated_at":"2025-12-05T13:43:29+00:00"
-}
-```
-### DELETE /ips/:id
-Delete an IP address by ID.
-
-**Example request:**
-```sh
-curl -u admin:admin -X DELETE http://localhost:9292/ips/1
-```
-
-
-### GET /sidekiq
-Access the Sidekiq web interface.
-
-**Example request:**
-```sh
-curl -u admin:admin http://localhost:9292/sidekiq
-```
+- **IPv4 only.** Reserved, loopback, link-local (including the cloud metadata
+  endpoint) and RFC1918 private ranges are rejected; IPv6 input is refused
+  explicitly rather than silently mishandled.
+- **ICMP inside a container.** The image installs `iputils-ping` and grants the
+  binary `cap_net_raw`, so the non-root application user can send pings without
+  running the container as root.
+- **Schema as SQL.** A database trigger maintains the status-change history, so
+  the schema is tracked as `db/structure.sql` rather than `schema.rb`.

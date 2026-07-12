@@ -1,87 +1,20 @@
-version: '3.8'
-
+# Development dependencies only — the Rails app itself runs on the host.
 services:
-  ip_monitor:
-    platform: linux/amd64
-    build:
-      context: .
-      dockerfile: .docker/Dockerfile
-    command: bundle exec puma -C config/puma.rb
-    environment:
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DATABASE_URL=${DATABASE_URL}
-      - ADMIN_USERNAME=${ADMIN_USERNAME}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
-      - RACK_ENV=${RACK_ENV}
-      - REDIS_URL=${REDIS_URL}
-    ports:
-      - "9292:9292"
-    volumes:
-      - tmp_data:/app/tmp
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    networks:
-      - app_network
-
-  sidekiq:
-    platform: linux/amd64
-    build:
-      context: .
-      dockerfile: .docker/Dockerfile
-    command: bundle exec sidekiq -r ./config/sidekiq.rb -v
-    environment:
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DATABASE_URL=${DATABASE_URL}
-      - RACK_ENV=${RACK_ENV}
-      - REDIS_URL=${REDIS_URL}
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    networks:
-      - app_network
-
   db:
-    image: postgres:15
+    image: postgres:17
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      # 5433 on the host: 5432 is taken by a local Homebrew Postgres
+      - "5433:5432"
     volumes:
-      - pg:/var/lib/postgresql/data
-    networks:
-      - app_network
+      - pg_data:/var/lib/postgresql/data
 
   redis:
     image: redis:7
     ports:
       - "6379:6379"
-    networks:
-      - app_network
-
-networks:
-  app_network:
-    driver: bridge
 
 volumes:
-  pg:
-  tmp_data:
+  pg_data:

@@ -1,5 +1,8 @@
-# frozen_string_literal: true
+require "net/ping"
 
+# Pings a batch of IPs in parallel and returns their round-trip time in ms
+# (nil when unreachable). Pure Ruby — carried over from the Roda version
+# unchanged, since it has no framework dependencies.
 class PingCheckerService
   TIMEOUT = 1
   DEFAULT_THREADS = 25
@@ -41,15 +44,9 @@ class PingCheckerService
     start_time = monotonic_time
     success    = ping.ping?
 
-    {
-      ip_address: ip_address,
-      rtt: success ? elapsed_ms(start_time) : nil
-    }
+    { ip_address: ip_address, rtt: success ? elapsed_ms(start_time) : nil }
   rescue StandardError
-    {
-      ip_address: ip_address,
-      rtt: nil
-    }
+    { ip_address: ip_address, rtt: nil }
   end
 
   def monotonic_time
