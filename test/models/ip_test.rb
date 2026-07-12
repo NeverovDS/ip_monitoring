@@ -28,7 +28,7 @@ class IpTest < ActiveSupport::TestCase
   end
 
   test "rejects IPv6 addresses gracefully instead of raising" do
-    ["::1", "2001:4860:4860::8888"].each do |addr|
+    [ "::1", "2001:4860:4860::8888" ].each do |addr|
       ip = Ip.new(ip_address: addr)
       assert_nothing_raised { ip.valid? }
       assert_not ip.valid?
@@ -46,7 +46,7 @@ class IpTest < ActiveSupport::TestCase
   test "enabled scope returns only enabled IPs" do
     on = Ip.create!(ip_address: "8.8.8.8", enabled: true)
     Ip.create!(ip_address: "1.1.1.1", enabled: false)
-    assert_equal [on], Ip.enabled.to_a
+    assert_equal [ on ], Ip.enabled.to_a
   end
 
   test "destroying an ip removes its dependent checks and status changes" do

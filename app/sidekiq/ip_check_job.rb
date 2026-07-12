@@ -31,7 +31,7 @@ class IpCheckJob
   def fetch_ip_pairs(ids)
     # pluck avoids instantiating models; inet values come back as IPAddr,
     # so stringify them to use as ping targets and Hash keys.
-    Ip.where(id: ids).pluck(:id, :ip_address).map { |id, address| [id, address.to_s] }
+    Ip.where(id: ids).pluck(:id, :ip_address).map { |id, address| [ id, address.to_s ] }
   end
 
   def build_id_map(ip_pairs)

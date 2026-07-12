@@ -11,7 +11,7 @@ class IpCheckJobTest < ActiveSupport::TestCase
     ip.ip_checks.create!(rtt: 10.0, created_at: Time.current)
 
     assert_turbo_stream_broadcasts("ips", count: 1) do
-      IpCheckJob.new.send(:broadcast_summaries, [ip.id])
+      IpCheckJob.new.send(:broadcast_summaries, [ ip.id ])
     end
   end
 end

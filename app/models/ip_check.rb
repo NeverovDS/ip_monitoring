@@ -17,7 +17,7 @@ class IpCheck < ApplicationRecord
   # ActiveRecord calculation equivalent — splitting into per-metric calls would
   # mean several queries and still-raw SQL fragments.
   def self.rtt_stats(ip_id, from, to)
-    sql = sanitize_sql_array([<<~SQL, { ip_id: ip_id, from: from, to: to }])
+    sql = sanitize_sql_array([ <<~SQL, { ip_id: ip_id, from: from, to: to } ])
       SELECT
         AVG(rtt)                                         AS avg_rtt,
         MIN(rtt)                                         AS min_rtt,

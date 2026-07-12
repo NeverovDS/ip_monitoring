@@ -35,7 +35,7 @@ class TimeRange
 
   # [from, to] ready to splat into IpStatsService / IpCheck.rtt_points.
   def window
-    [effective_from, effective_to]
+    [ effective_from, effective_to ]
   end
 
   private
