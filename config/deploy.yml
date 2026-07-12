@@ -44,7 +44,7 @@ ssh:
 # Env for all roles (web + job). Non-secret values inline, secrets by name.
 env:
   clear:
-    DB_HOST: ip_monitoring-db
+    DB_HOST: ipmon-db.cj2kayq06781.eu-north-1.rds.amazonaws.com
     DB_PORT: 5432
     REDIS_URL: redis://ip_monitoring-redis:6379/0
     RAILS_LOG_TO_STDOUT: "1"
@@ -61,22 +61,10 @@ aliases:
   logs: app logs -f
   dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
 
-# Postgres and Redis run as containers on the same host, on the shared "kamal"
-# network, so the app reaches them by container name (ip_monitoring-db / -redis).
-# Ports are bound to 127.0.0.1 only — never exposed to the internet.
+# Redis runs as a container on the host (shared "kamal" network, reached by
+# name). Postgres now lives in AWS RDS — see env.DB_HOST — not as an accessory.
+# The port is bound to 127.0.0.1 only, never exposed to the internet.
 accessories:
-  db:
-    image: postgres:17
-    host: 51.20.162.241
-    port: "127.0.0.1:5432:5432"
-    env:
-      clear:
-        POSTGRES_USER: ip_monitoring
-        POSTGRES_DB: ip_monitoring_production
-      secret:
-        - POSTGRES_PASSWORD
-    directories:
-      - data:/var/lib/postgresql/data
   redis:
     image: redis:7
     host: 51.20.162.241
