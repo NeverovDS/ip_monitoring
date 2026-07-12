@@ -4,7 +4,7 @@
 service: ip_monitoring
 
 # Image name on the registry. Replace morteo12 with your Docker Hub username.
-image: morteo12/ip_monitoring
+image: ip_monitoring
 
 # Target servers. web = Puma (via Thruster); job = Sidekiq worker. Same host for now.
 servers:
@@ -22,9 +22,12 @@ proxy:
   healthcheck:
     path: /up
 
-# Container registry (Docker Hub). Password is the access token (never the login password).
+# Container registry: AWS ECR (private, same account/region as the server).
+# Username is the literal "AWS"; the password is a 12h token from
+# `aws ecr get-login-password` (see .kamal/secrets) — no long-lived secret.
 registry:
-  username: morteo12
+  server: 535450902063.dkr.ecr.eu-north-1.amazonaws.com
+  username: AWS
   password:
     - KAMAL_REGISTRY_PASSWORD
 
