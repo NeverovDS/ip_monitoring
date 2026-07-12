@@ -137,12 +137,28 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-north-1
 
-      - name: Set up SSH key and known_hosts
+      - name: Install the SSM Session Manager plugin
+        run: |
+          curl -sL "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb" -o /tmp/smp.deb
+          sudo dpkg -i /tmp/smp.deb
+
+      - name: Set up SSH over SSM
+        # Reach the EC2 host through an SSM tunnel — no inbound SSH port is open.
         run: |
           mkdir -p ~/.ssh
           printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/ipmon-key.pem
           chmod 600 ~/.ssh/ipmon-key.pem
-          ssh-keyscan -H 51.20.162.241 >> ~/.ssh/known_hosts
+          {
+            echo "Host i-0255797bc34a5c6eb"
+            echo "  ProxyCommand aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p"
+            echo "  User ubuntu"
+            echo "  IdentityFile ~/.ssh/ipmon-key.pem"
+            echo "  StrictHostKeyChecking accept-new"
+          } > ~/.ssh/config
+          chmod 600 ~/.ssh/config
 
       - name: Deploy with Kamal
+        env:
+          LANG: C.UTF-8 # SSHKit chokes on a non-UTF-8 locale over the SSM tunnel
+          LC_ALL: C.UTF-8
         run: bin/kamal deploy
