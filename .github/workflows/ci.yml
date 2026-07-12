@@ -117,7 +117,6 @@ jobs:
       IP_MONITORING_DATABASE_PASSWORD: ${{ secrets.IP_MONITORING_DATABASE_PASSWORD }}
       ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-      RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -156,6 +155,11 @@ jobs:
             echo "  StrictHostKeyChecking accept-new"
           } > ~/.ssh/config
           chmod 600 ~/.ssh/config
+
+      - name: Write the Rails master key from the secret
+        # .kamal/secrets reads RAILS_MASTER_KEY from config/master.key (git-ignored),
+        # so recreate it here. tr strips any stray whitespace/newline from the secret.
+        run: printf '%s' "${{ secrets.RAILS_MASTER_KEY }}" | tr -d '[:space:]' > config/master.key
 
       - name: Deploy with Kamal
         env:
