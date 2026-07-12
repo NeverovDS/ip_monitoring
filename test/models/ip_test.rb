@@ -19,9 +19,21 @@ class IpTest < ActiveSupport::TestCase
     assert_includes ip.errors[:ip_address], "is not a valid IP address"
   end
 
-  test "rejects a reserved/forbidden range" do
-    assert_not Ip.new(ip_address: "127.0.0.1").valid?
-    assert_not Ip.new(ip_address: "169.254.0.1").valid?
+  test "rejects reserved, link-local and private ranges" do
+    %w[0.0.0.1 127.0.0.1 169.254.169.254 10.0.0.5 172.16.5.5 192.168.1.1 255.255.255.255].each do |addr|
+      ip = Ip.new(ip_address: addr)
+      assert_not ip.valid?, "#{addr} should be rejected"
+      assert_includes ip.errors[:ip_address], "is in a forbidden range"
+    end
+  end
+
+  test "rejects IPv6 addresses gracefully instead of raising" do
+    ["::1", "2001:4860:4860::8888"].each do |addr|
+      ip = Ip.new(ip_address: addr)
+      assert_nothing_raised { ip.valid? }
+      assert_not ip.valid?
+      assert_includes ip.errors[:ip_address], "must be an IPv4 address"
+    end
   end
 
   test "enforces uniqueness of the address" do

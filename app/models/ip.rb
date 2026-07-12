@@ -5,11 +5,16 @@ class Ip < ApplicationRecord
   has_many :ip_checks, dependent: :delete_all
   has_many :ip_status_changes, dependent: :delete_all
 
-  # Reserved / non-routable ranges we refuse to monitor.
+  # Reserved / non-routable IPv4 ranges we refuse to monitor: "this network",
+  # loopback, link-local (incl. the cloud metadata endpoint), RFC1918 private
+  # ranges, multicast, and limited broadcast.
   FORBIDDEN_RANGES = %w[
     0.0.0.0/8
+    10.0.0.0/8
     127.0.0.0/8
     169.254.0.0/16
+    172.16.0.0/12
+    192.168.0.0/16
     224.0.0.0/4
     255.255.255.255
   ].map { |range| IPAddress(range) }.freeze
@@ -37,6 +42,15 @@ class Ip < ApplicationRecord
     end
 
     ip = IPAddress(ip_address.to_s)
+
+    # IPv4 only: the forbidden ranges and the ping checker are IPv4-based, and
+    # comparing an IPv6 address against an IPv4 range raises inside the
+    # ipaddress gem. Reject IPv6 explicitly instead of crashing.
+    unless ip.ipv4?
+      errors.add(:ip_address, "must be an IPv4 address")
+      return
+    end
+
     errors.add(:ip_address, "is in a forbidden range") if FORBIDDEN_RANGES.any? { |range| range.include?(ip) }
   rescue ArgumentError
     errors.add(:ip_address, "is not a valid IP address")
