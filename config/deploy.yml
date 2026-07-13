@@ -37,6 +37,17 @@ registry:
 builder:
   arch: arm64
 
+# Ship container stdout/stderr to CloudWatch Logs via Docker's built-in awslogs
+# driver (no CloudWatch Agent needed). The EC2 instance role (ipmon-ec2-ssm) has
+# logs:CreateLogStream/PutLogEvents. Applies to web + job; each container is its
+# own log stream inside /ipmon/app. Docker keeps a local copy (dual logging), so
+# `kamal app logs` still works. The log group + 7-day retention are pre-created.
+logging:
+  driver: awslogs
+  options:
+    awslogs-region: eu-north-1
+    awslogs-group: /ipmon/app
+
 # SSH into the EC2 host. Ubuntu AMIs disable root login: connect as "ubuntu"
 # (passwordless sudo) with our key. keys_only avoids the agent offering others.
 ssh:
