@@ -90,6 +90,7 @@ GEM
     bundler-audit (0.9.3)
       bundler (>= 1.2.0)
       thor (~> 1.0)
+    cap2 (0.2.2)
     capybara (3.40.0)
       addressable
       matrix
@@ -168,7 +169,9 @@ GEM
     net-imap (0.6.4.1)
       date
       net-protocol
-    net-ping (2.0.8)
+    net-ping (2.1.1)
+    net-ping (2.1.1-universal-linux)
+      cap2 (>= 0.2.2)
     net-pop (0.1.2)
       net-protocol
     net-protocol (0.2.2)
