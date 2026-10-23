@@ -24,8 +24,10 @@ gem "sidekiq-cron"
 # IP address parsing/validation for the availability checks
 gem "ipaddress"
 
-# ICMP availability checks (shells out to the system ping)
-gem "net-ping"
+# ICMP availability checks (shells out to the system ping). Held below 2.1: from 2.1 the Linux
+# build depends on the native cap2 gem (libcap headers in CI and the image), which only the
+# raw-socket Net::Ping::ICMP uses, not Net::Ping::External.
+gem "net-ping", "< 2.1"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"

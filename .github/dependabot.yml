@@ -5,6 +5,10 @@ updates:
   schedule:
     interval: weekly
   open-pull-requests-limit: 10
+  # net-ping 2.1+ needs the native cap2 gem on Linux; see the comment in the Gemfile.
+  ignore:
+  - dependency-name: net-ping
+    versions: [">= 2.1"]
 - package-ecosystem: github-actions
   directory: "/"
   schedule:
