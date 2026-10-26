@@ -49,3 +49,11 @@
 # Ignore Docker-related files
 /.dockerignore
 /Dockerfile*
+
+# Ignore coding-agent configuration: it is for developers, the running app never reads it.
+/.claude
+/.githooks
+/.mcp.json
+/CLAUDE.md
+/lib/agent_role.rb
+/lib/tasks/agent.rake
