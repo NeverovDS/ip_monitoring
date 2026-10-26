@@ -57,3 +57,5 @@
 /CLAUDE.md
 /lib/agent_role.rb
 /lib/tasks/agent.rake
+/evals
+/bin/eval

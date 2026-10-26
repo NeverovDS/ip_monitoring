@@ -14,6 +14,7 @@ bin/setup --skip-server       # gems, database, agent DB role, git hooks; warns 
 bin/rails db:test:prepare test # full suite, a few seconds
 bin/rubocop                   # rubocop-rails-omakase; `bin/rubocop -a` autocorrects
 bin/brakeman --no-pager       # security scan, also runs in CI
+bin/eval                      # agent evals: costs tokens, run only when the human asks
 ```
 
 ## Where things are

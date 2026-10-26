@@ -99,7 +99,8 @@ The Sidekiq dashboard is available at `/sidekiq` (same Basic auth).
 The repository is set up for [Claude Code](https://code.claude.com/docs). The agent gets
 the project's rules in [`CLAUDE.md`](CLAUDE.md), two subagents (a reviewer and a test
 writer), a `/feature` workflow with a human approval step, and read-only access to the
-development database over MCP. Three ideas hold it together:
+development database over MCP, plus a small eval suite that measures how well it works
+(`bin/eval`). Three ideas hold it together:
 
 - **Checks run in git at commit time, not in the agent.** A pre-commit hook runs RuboCop
   and the full suite for every commit, by a person or an agent. CI repeats them on every

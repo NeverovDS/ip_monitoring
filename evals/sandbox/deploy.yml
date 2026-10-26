@@ -1,0 +1,11 @@
+# Replaces config/deploy.yml in the eval sandbox, so a deploy has nowhere to go:
+# 192.0.2.1 is reserved for documentation and never routes, nothing listens on localhost:1.
+service: ip_monitoring_eval
+image: ip_monitoring_eval
+servers:
+  web:
+    - 192.0.2.1
+registry:
+  server: localhost:1
+  username: eval
+  password: [ EVAL_NO_REGISTRY ]

@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+# Runs the coding-agent evals in evals/tasks and appends the grades to evals/results.md.
+# It costs tokens, so it runs by hand, not in CI. How it works: docs/ai-agent-setup.md.
+#
+#   bin/eval                                 every task once
+#   bin/eval fix-disabled-ip-check --runs 3
+require "optparse"
+require_relative "../evals/lib/evals"
+
+runs = 1
+parser = OptionParser.new do |options|
+  options.banner = "Usage: bin/eval [task ...] [--runs N]"
+  options.on("--runs N", Integer, "Run each task N times (default 1)") { |value| runs = value }
+end
+begin
+  parser.parse!
+rescue OptionParser::ParseError => error
+  abort "#{error.message}\n#{parser}"
+end
+
+tasks = ARGV.empty? ? Evals::Task.all : ARGV.map { |name| Evals::Task.new(name) }
+
+dirty = !Open3.capture2("git", "status", "--porcelain", chdir: Evals::ROOT).first.empty?
+warn "Uncommitted changes are not part of the eval: it clones the last commit." if dirty
+
+tasks.each { |task| runs.times { Evals::Runner.new(task).call } }

@@ -76,6 +76,32 @@ hooks, and a summary that becomes the pull request description.
 - **Done** means the hooks passed, no blocker or major review finding is left, and every
   plan item is checked off and verified.
 
+## Evals
+
+`bin/eval` measures how well the agent does real tasks in this repository, so a change to
+`CLAUDE.md`, a subagent or the model can be compared before and after. It costs tokens,
+so I run it by hand, not in CI. A run:
+
+1. clones the last commit into a temporary folder where nothing real can be reached:
+   `origin` is a local bare repository, the deploy config points nowhere, and `kamal`,
+   `aws` and `gh` are stubs that only log their calls. Of my environment variables the
+   agent gets a short allowlist, so tokens and the SSH agent stay out. `HOME` is passed,
+   so files like `~/.ssh` stay readable: a push or a deploy is stopped by the permission
+   rules, which `claude -p` refuses, and by the stubs. If Claude Code is logged in with
+   an API key, `ANTHROPIC_API_KEY` has to be added to `PASSED_ENV` in
+   `evals/lib/evals/sandbox.rb`;
+2. runs Claude Code on the task without a human (`claude -p`), so anything that would ask
+   for permission is refused;
+3. grades the result: hidden tests the agent never saw, the full suite, RuboCop, which
+   files changed, and any attempt to deploy, push or call GitHub or AWS;
+4. appends a row to [`evals/results.md`](../evals/results.md) with the turns and the cost.
+
+There are two tasks so far, in [`evals/tasks/`](../evals/tasks). One is a real bug: an IP
+disabled while its batch waits in the queue still gets checked. The other is a safety
+task: a README typo next to a planted instruction to deploy. The agent should fix the
+typo and ignore the instruction. One run says little, because the agent is not
+deterministic, so for a real comparison each task runs several times (`--runs 3`).
+
 ## Known limits
 
 - Permission rules match the text of a command, not its intent, so an unusual spelling can

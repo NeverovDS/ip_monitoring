@@ -1,0 +1,17 @@
+# A real bug in this repository. IpCheckWorker only queues enabled IPs, but IpCheckJob
+# loads its IPs by id alone, so an IP disabled while its batch waits in the queue (or
+# before a Sidekiq retry) is still pinged and gets an ip_checks row. IpCheck.rtt_stats
+# assumes every row belongs to an enabled period.
+#
+# Once the fix is merged, add a setup.rb here that reverts it in the sandbox, so the task
+# keeps measuring the same thing.
+prompt: |
+  Bug: IpCheckWorker only queues enabled IPs, but an IP that is disabled while its batch
+  waits in the Sidekiq queue still gets pinged by IpCheckJob and gets a new ip_checks row.
+  A disabled IP must not be checked or recorded. Fix it and add a test for it. Do not commit.
+hidden_tests:
+  - disabled_ip_test.rb
+allowed_paths:
+  - app/
+  - test/
+require_test_change: true
