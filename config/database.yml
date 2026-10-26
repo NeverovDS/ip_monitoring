@@ -61,6 +61,9 @@ development:
 test:
   <<: *default
   database: ip_monitoring_test
+  # Above 50 tests Rails forks parallel workers. On macOS libpq then segfaults in the forked
+  # process while it negotiates GSSAPI encryption, and the run hangs; nothing here uses it.
+  gssencmode: disable
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
