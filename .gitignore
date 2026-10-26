@@ -34,5 +34,10 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+# Ignore the git worktrees Claude Code creates for isolated subagents and sessions, and each
+# developer's own Claude Code settings.
+/.claude/worktrees/
+/.claude/settings.local.json
+
 .DS_Store
 

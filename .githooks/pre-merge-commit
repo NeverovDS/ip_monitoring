@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Git pre-merge-commit hook: a merge that creates a commit goes through the same checks as
+# any other commit, so it is refused on main as well. Fast-forward merges, cherry-pick and
+# rebase create no merge commit and never reach this hook; for main, branch protection on
+# GitHub (pull request with green CI) is what stops them.
+exec "$(dirname "$0")/pre-commit"

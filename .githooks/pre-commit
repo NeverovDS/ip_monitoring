@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Git pre-commit hook: no commits on main, RuboCop on the staged Ruby files, then the full
+# test suite. bin/setup enables it (git config core.hooksPath .githooks), so it runs for
+# every commit in this clone and its worktrees, by a human or a coding agent, however the
+# command is spelled. The agent may not skip it: --no-verify and core.hooksPath overrides
+# are denied in .claude/settings.json. CI runs the same checks again on every push.
+set -uo pipefail
+
+if [[ "$(git symbolic-ref --short -q HEAD)" == "main" ]]; then
+  echo "pre-commit: main deploys to production on push. Commit on a feature branch." >&2
+  exit 1
+fi
+
+# The files this commit contains, NUL-separated so that no filename gets quoted or split.
+# RuboCop reads the working-tree copy, so a partly staged file is linted as a whole.
+ruby_files=()
+while IFS= read -r -d '' file; do
+  case "$file" in
+    *.rb | *.rake | *.ru | Gemfile | */Gemfile | Rakefile | */Rakefile) ruby_files+=("$file") ;;
+  esac
+done < <(git diff --cached --name-only --diff-filter=ACMR -z)
+
+# --force-exclusion respects the Exclude list in .rubocop.yml even for explicit paths.
+if (( ${#ruby_files[@]} )) && ! bin/rubocop --format simple --force-exclusion "${ruby_files[@]}" >&2; then
+  echo "pre-commit: fix the RuboCop offenses above (bin/rubocop -a autocorrects most), then commit again." >&2
+  exit 1
+fi
+
+# A commit of Markdown files only needs no test run; anything else runs the whole suite.
+# The list goes through a variable: piped straight into `grep -q`, a long list would end in
+# SIGPIPE, which pipefail turns into a failure, and the suite would be skipped silently.
+staged=$(git diff --cached --name-only)
+[[ -n "$staged" ]] && grep -qvE '\.md$' <<<"$staged" || exit 0
+
+# Git exports GIT_DIR, GIT_INDEX_FILE and friends to hooks, with absolute paths in a linked
+# worktree. Anything in the suite that runs git would act on this commit's index, so the
+# suite runs without them; the hook needed them only for the `git diff --cached` above.
+if output=$(unset $(compgen -e | grep '^GIT_'); bin/rails db:test:prepare test 2>&1); then
+  exit 0
+fi
+
+if grep -qE "ConnectionNotEstablished|could not connect to server|Connection refused" <<<"$output"; then
+  echo "pre-commit: the tests could not run, Postgres is not reachable. Start it with \`docker compose up -d db\`, then commit again." >&2
+  exit 1
+fi
+
+# Keep the summary short: failures and the final counts line are what the reader needs.
+# awk drops lines already printed: the failure context can overlap the tail.
+{ grep -E -A12 "(Failure|Error):" <<<"$output" | head -60; tail -3 <<<"$output"; } | awk 'NF == 0 || !seen[$0]++' >&2
+echo "pre-commit: the test suite is red. Fix the code, not the tests, unless a test is wrong for a reason you can state." >&2
+exit 1

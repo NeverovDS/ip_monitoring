@@ -15,6 +15,15 @@ FileUtils.chdir APP_ROOT do
   puts "== Installing dependencies =="
   system("bundle check") || system!("bundle install")
 
+  # RuboCop and the test suite before every commit, and no commits on main (.githooks/).
+  puts "\n== Enabling the git hooks =="
+  system("git", "config", "core.hooksPath", ".githooks") ||
+    warn("Could not set core.hooksPath: commits will not be checked before they are made.")
+
+  # The Claude Code secrets guard and its test read their input with jq.
+  system("command -v jq >/dev/null") ||
+    warn("jq is not installed: the secrets guard refuses every Claude Code tool call and test/hooks fails.")
+
   # puts "\n== Copying sample files =="
   # unless File.exist?("config/database.yml")
   #   FileUtils.cp "config/database.yml.sample", "config/database.yml"
