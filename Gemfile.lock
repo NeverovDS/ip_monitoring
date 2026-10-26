@@ -164,6 +164,7 @@ GEM
     minitest (6.0.6)
       drb (~> 2.0)
       prism (~> 1.5)
+    minitest-mock (5.27.0)
     msgpack (1.8.5)
     net-imap (0.6.8)
       date
@@ -382,6 +383,7 @@ DEPENDENCIES
   importmap-rails
   ipaddress
   kamal
+  minitest-mock
   net-ping (< 2.1)
   pg (~> 1.1)
   propshaft
