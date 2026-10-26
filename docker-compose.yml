@@ -6,15 +6,16 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      # 5433 on the host: 5432 is taken by a local Homebrew Postgres
-      - "5433:5432"
+      # 5433 on the host: 5432 is taken by a local Homebrew Postgres. Bound to localhost:
+      # the passwords here and the agent role's are public, so the LAN must not reach it.
+      - "127.0.0.1:5433:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
 
   redis:
     image: redis:7
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
 
 volumes:
   pg_data:
