@@ -1,6 +1,6 @@
 # IP Monitoring
 
-[![CI](https://github.com/NeverovDS/ip_monitoring/actions/workflows/deploy.yml/badge.svg)](https://github.com/NeverovDS/ip_monitoring/actions/workflows/deploy.yml)
+[![CI](https://github.com/NeverovDS/ip_monitoring/actions/workflows/ci.yml/badge.svg)](https://github.com/NeverovDS/ip_monitoring/actions/workflows/ci.yml)
 
 Real-time availability monitor for IPv4 hosts. A background worker pings every
 host once a minute, records the round-trip time, and streams the results to a
@@ -58,11 +58,11 @@ to ECR, and runs `kamal deploy`. The test suite runs on every push and PR.
 
 ## Local development
 
-Requires Ruby 3.4.2 and Docker.
+Requires Ruby 3.4.2, Docker and `jq` (the tests of the secrets guard use it).
 
 ```sh
 docker compose up -d   # Postgres (5433) + Redis
-bin/setup              # install gems, prepare the database
+bin/setup              # gems, database, git hooks, the agent DB role (see below)
 bin/rails server       # http://localhost:3000
 bundle exec sidekiq    # run the background checks
 ```
@@ -93,6 +93,23 @@ curl -u admin:secret http://localhost:3000/api/v1/ips
 ```
 
 The Sidekiq dashboard is available at `/sidekiq` (same Basic auth).
+
+## Working with AI coding agents
+
+The repository is set up for [Claude Code](https://code.claude.com/docs). The agent gets
+the project's rules in [`CLAUDE.md`](CLAUDE.md), two subagents (a reviewer and a test
+writer), a `/feature` workflow with a human approval step, and read-only access to the
+development database over MCP. Three ideas hold it together:
+
+- **Checks run in git at commit time, not in the agent.** A pre-commit hook runs RuboCop
+  and the full suite for every commit, by a person or an agent. CI repeats them on every
+  pull request, and `main` only accepts green ones.
+- **Anything that leaves the machine asks a human first:** push, `gh`, deploys, AWS. The
+  agent cannot read the secret files.
+- **The database is read-only for the agent through its role, not a tool flag**, and tests
+  prove it.
+
+How it is set up, why, and its known limits: [docs/ai-agent-setup.md](docs/ai-agent-setup.md).
 
 ## Implementation notes
 
