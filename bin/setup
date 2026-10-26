@@ -33,6 +33,13 @@ FileUtils.chdir APP_ROOT do
   system! "bin/rails db:prepare"
   system! "bin/rails db:reset" if ARGV.include?("--reset")
 
+  # The coding agent's Postgres MCP server logs in as this role (see CLAUDE.md). lib/agent_role.rb
+  # creates it only for the local development database on :5433. Not fatal: without the role
+  # setup still finishes, only the MCP server cannot log in.
+  puts "\n== Creating the read-only database role for coding agents =="
+  system("bin/rails", "agent:role") ||
+    warn("Could not create the agent role: the Postgres MCP server will not be able to log in.")
+
   puts "\n== Removing old logs and tempfiles =="
   system! "bin/rails log:clear tmp:clear"
 

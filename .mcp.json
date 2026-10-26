@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "postgres": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@toolbox-sdk/server@1.14.0", "--prebuilt=postgres", "--stdio"],
+      "env": {
+        "POSTGRES_HOST": "localhost",
+        "POSTGRES_PORT": "5433",
+        "POSTGRES_DATABASE": "ip_monitoring_development",
+        "POSTGRES_USER": "ipmon_agent_ro",
+        "POSTGRES_PASSWORD": "agent_ro_dev_only"
+      }
+    }
+  }
+}

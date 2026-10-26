@@ -6,7 +6,8 @@
       "Bash(bin/rails db:test:prepare test)",
       "Bash(bin/rubocop)",
       "Bash(bin/rubocop -a)",
-      "Bash(bin/brakeman --no-pager)"
+      "Bash(bin/brakeman --no-pager)",
+      "mcp__postgres"
     ],
     "ask": [
       "Bash(git push *)",
